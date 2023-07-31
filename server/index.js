@@ -15,7 +15,7 @@ const csvParser = new Parser({
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, "./uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
@@ -29,13 +29,18 @@ app.use(cors());
 app.get("/distinta_base/single", (req, res) => {
   res.send("distinta base sigole");
 });
-app.post(
-  "/distinta_base/multiple",
-  upload.single("elementi"),
+
+
+
+
+app.post("/distinta_base/multiple", upload.single("elementi"),
   async (req, res) => {
     let tempFinalDistinte = [];
+ 
+    const filePath = path.resolve(req.file.path)
+
     const elements = fs
-      .readFileSync(path.resolve(req.file.path))
+      .readFileSync(filePath)
       .toString()
       .split("\r\n");
 
@@ -80,7 +85,7 @@ async function GetDistintaBase(ITMREF, in_production) {
       ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
       where BOMALT_0='1'
       `;
-      console.log(query);
+      
   const sage = await connection.connect();
   const result = await sage.query(query);
 

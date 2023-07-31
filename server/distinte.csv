@@ -5,17 +5,13 @@
 "M00003550";"M00003550";"M00003552";"5006406300";"SLL01";"sheet metal";" ";" ";" ";1;"PZ";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 "M00003550";"M00003550";"SER0100925";" ";"SER01";"Costo Verniciatura a polvere";" ";" ";" ";1;"UN";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 "M00003550";"M00003552";"M00000470";"MM-LZ07-0001";"MPL01";"lamiere in acciaio zincato";"lega HSLA 340+ZF110A";"spessore 15/10";"LAMPI";0.01;"KG";"Acciaio zincato";"Lega HSLA 340+ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
+"M00003550";"M00003551";"M00000470";"MM-LZ07-0001";"MPL01";"lamiere in acciaio zincato";"lega HSLA 340+ZF110A";"spessore 15/10";"LAMPI";2.226;"KG";"Acciaio zincato";"Lega HSLA 340+ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
+"M00003550";"M00004194";"M00000431";"MM-LZ04-0002";"MPL01";"lamiere in acciaio zincato";"lega H320LAD+ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega H320LAD+ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
+"M00003550";"M00004195";"M00000431";"MM-LZ04-0002";"MPL01";"lamiere in acciaio zincato";"lega H320LAD+ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega H320LAD+ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
 "M00003550";"M00003552";"M00000470";"MM-LZ07-0001";"MPL01";"lamiere in acciaio zincato";"lega HSLA 340+ZF110A";"spessore 15/10";"LAMPI";0.01;"KG";"Acciaio zincato";"Lega HSLA 340+ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00003552";"M00006211";"MM-LZ09-0001";"MPL01";"lamiera acciaio zincato ";"lega DX54+ZF110RB ";"3000x1500 spessore 1.5 mm";"LAMPI";0.01;"UN";"Acciaio zincato";"Lega DX54D + ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
 "M00003550";"M00003551";"M00000470";"MM-LZ07-0001";"MPL01";"lamiere in acciaio zincato";"lega HSLA 340+ZF110A";"spessore 15/10";"LAMPI";2.226;"KG";"Acciaio zincato";"Lega HSLA 340+ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00003551";"M00000470";"MM-LZ07-0001";"MPL01";"lamiere in acciaio zincato";"lega HSLA 340+ZF110A";"spessore 15/10";"LAMPI";2.226;"KG";"Acciaio zincato";"Lega HSLA 340+ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00003551";"M00006211";"MM-LZ09-0001";"MPL01";"lamiera acciaio zincato ";"lega DX54+ZF110RB ";"3000x1500 spessore 1.5 mm";"LAMPI";2.226;"UN";"Acciaio zincato";"Lega DX54D + ZF110A";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
 "M00003550";"M00004194";"M00000431";"MM-LZ04-0002";"MPL01";"lamiere in acciaio zincato";"lega H320LAD+ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega H320LAD+ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00004194";"M00000431";"MM-LZ04-0002";"MPL01";"lamiere in acciaio zincato";"lega H320LAD+ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega H320LAD+ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00004194";"M00000527";"MM-LZ08-0002";"MPL01";"lamiere in acciaio zincato";"lega DX52 + ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega DX52 + ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
 "M00003550";"M00004195";"M00000431";"MM-LZ04-0002";"MPL01";"lamiere in acciaio zincato";"lega H320LAD+ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega H320LAD+ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00004195";"M00000431";"MM-LZ04-0002";"MPL01";"lamiere in acciaio zincato";"lega H320LAD+ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega H320LAD+ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
-"M00003550";"M00004195";"M00000527";"MM-LZ08-0002";"MPL01";"lamiere in acciaio zincato";"lega DX52 + ZF110RB";"spessore 15/10";"LAMPI";0.23;"KG";"Acciaio zincato";"Lega DX52 + ZF110RB";0;0;3000;0;1500;0;0;0;0;0;0;1.5;0;0;0;0
 "M00002997";"M00002997";"M00002999";"5802879525";"SLL01";"sheet metal";" ";" ";" ";1;"PZ";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 "M00002997";"M00002997";"M00003000";"5802894095";"SLL01";"sheet metal";" ";" ";" ";1;"PZ";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 "M00002997";"M00002997";"M00003002";"5802912779";"SLL01";"sheet metal";" ";" ";" ";1;"PZ";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
@@ -23,12 +19,12 @@
 "M00002997";"M00002997";"M00003001";"5802893463";"SLL01";"sheet metal";" ";" ";" ";1;"PZ";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 "M00002997";"M00002997";"M00001067";"PC-RV05-0004";"MNR01";"rivetto filettato ";"testa svasata";"M6";" ";4;"PZ";"";"";0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 "M00002997";"M00003001";"M00000367";"MM-LA02-0006";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 40/10";"LAMPI";0.084;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;4;0;0;0;0
-"M00002997";"M00003001";"M00000367";"MM-LA02-0006";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 40/10";"LAMPI";0.084;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;4;0;0;0;0
-"M00002997";"M00002998";"M00000367";"MM-LA02-0006";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 40/10";"LAMPI";0.88;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;4;0;0;0;0
 "M00002997";"M00002998";"M00000367";"MM-LA02-0006";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 40/10";"LAMPI";0.88;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;4;0;0;0;0
 "M00002997";"M00003002";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.052;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
-"M00002997";"M00003002";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.052;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
-"M00002997";"M00003000";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.156;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
 "M00002997";"M00003000";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.156;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
 "M00002997";"M00002999";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.07;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
+"M00002997";"M00003001";"M00000367";"MM-LA02-0006";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 40/10";"LAMPI";0.084;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;4;0;0;0;0
+"M00002997";"M00002998";"M00000367";"MM-LA02-0006";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 40/10";"LAMPI";0.88;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;4;0;0;0;0
+"M00002997";"M00003002";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.052;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
+"M00002997";"M00003000";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.156;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
 "M00002997";"M00002999";"M00000366";"MM-LA02-0005";"MPL01";"lamiere in alluminio";"lega 5754 H111";"spessore 30/10";"LAMPI";0.07;"KG";"Alluminio";"Lega 5754 H111";0;0;3000;0;1500;0;0;0;0;0;0;3;0;0;0;0
