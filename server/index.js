@@ -30,40 +30,104 @@ app.get("/distinta_base/single", (req, res) => {
   res.send("distinta base sigole");
 });
 
-
-
-
-app.post("/distinta_base/multiple", upload.single("elementi"),
+app.post(
+  "/distinta_base/multiple",
+  upload.single("elementi"),
   async (req, res) => {
     let tempFinalDistinte = [];
- 
-    const filePath = path.resolve(req.file.path)
 
-    const elements = fs
-      .readFileSync(filePath)
-      .toString()
-      .split("\r\n");
+    const filePath = path.resolve(req.file.path);
+
+    const elements = fs.readFileSync(filePath).toString().split("\r\n");
 
     const arrayDBBeforePromise = elements.map(async (row, index) => {
-      const distinta = await GetDistintaBase(row);
-      return distinta;
+      const EKD_CODE = await GetEkdCode(row)
+     
+      if(EKD_CODE.recordset){
+        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
+        return distinta;
+      }else{
+        return EKD_CODE
+      }
     });
-
-    const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
-    let aconcat = [];
-    arrayDistinte.forEach((row) => {
-      aconcat = aconcat.concat(row);
-    });
-
-    const csv = csvParser.parse(aconcat);
-    const pathNewFile = fs.writeFileSync(path.join(__dirname,'distinte.csv'),csv)
     
-    res.download(path.join(__dirname,'distinte.csv'))
+    const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
+    const undefined_number = arrayDistinte.filter(row=>{
+     return row.recordset
+    })
+    if(undefined_number.length > 0){
+      const undefined_pn = undefined_number.map((row)=>{
+        return row.CodiceCliente
+      })
+      
+      const pathNewFile = fs.writeFileSync(
+        path.join(__dirname, "distinte.csv"),
+        undefined_pn.join(',').toString()
+      );
+  
+      res.download(path.join(__dirname, "distinte.csv"));
+    }else{
+      let aconcat = [];
+      arrayDistinte.forEach((row) => {
+        aconcat = aconcat.concat(row);
+      });
+  
+      const csv = csvParser.parse(aconcat);
+      const pathNewFile = fs.writeFileSync(
+        path.join(__dirname, "distinte.csv"),
+        csv
+      );
+  
+      res.download(path.join(__dirname, "distinte.csv"));
+    }
 
-}
+  }
 );
 
+function GetEkdCode(CodiceCliente) {
+  return new Promise(async (resolve, reject) => {
+    const db = await connection.connect();
+    const { recordset } = await db
+      .request()
+      .input("codice", CodiceCliente.toString())
+      .query(
+        `IF (select COUNT(ITMREF_0) from PRODEKD.ITMBPC where ITMREFBPC_0 = @codice)>0 
+                            select ITMREF_0,ITMREFBPC_0 from PRODEKD.ITMBPC where ITMREFBPC_0 =@codice
+                            ELSE 
+                            select ITMREF_0, SEAKEY_0 from PRODEKD.ITMMASTER where SEAKEY_0=@codice`
+      );
+
+    resolve({
+      CodiceCliente,
+      recordset: recordset[0]
+    })
+    /*  if (recordset.length == 0) {
+       fileText += `${e},inesistente\r\n`;
+     } else {
+       fileText += `${e},${recordset[0].ITMREF_0}\r\n`;
+     }
+*/
+
+  });
+}
+
 //GetDistintaBase("M00003550");
+async function GetPrimaFase(ITMREF) {
+  const query = `	  SELECT  TEXTE_0 
+  FROM PRODEKD.ROUOPE 
+  left join PRODEKD.ATEXTRA ATEXTRA ON ATEXTRA.IDENT1_0 = WST_0 AND CODFIC_0='WORKSTATIO' and LANGUE_0='ITA' and ZONE_0='WSTDESAXX' and IDENT2_0='ITS02'
+  WHERE ITMREF_0='${ITMREF}' 
+  ORDER BY ITMREF_0, OPENUM_0`;
+
+  const sage = await connection.connect();
+  const result = await sage.query(query);
+
+  if (result.recordset.length > 0) {
+    return result.recordset[0].TEXTE_0;
+  } else {
+    return "null";
+  }
+}
 
 async function GetDistintaBase(ITMREF, in_production) {
   const query = `with wth as 
@@ -85,16 +149,17 @@ async function GetDistintaBase(ITMREF, in_production) {
       ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
       where BOMALT_0='1'
       `;
-      
+
   const sage = await connection.connect();
   const result = await sage.query(query);
 
   const lineeBP = result.recordset.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
+    const ciclo = await GetPrimaFase(row.Elemento);
 
     let tempObj = { ...row };
 
-    let unionTemp = { ...tempObj, ...linee };
+    let unionTemp = { ...tempObj, fase: ciclo,...linee };
 
     return unionTemp;
   });
