@@ -84,6 +84,35 @@ app.post(
   }
 );
 
+//codice cliente
+async function GetCodiceCliente(CodiceEkd) {
+  return new Promise(async (resolve, reject) => {
+    const db = await sage.connect();
+    const { recordset } = await db
+      .request()
+      .input("codice", CodiceEkd)
+      .query(
+        `IF (select COUNT(ITMREFBPC_0) from PRODEKD.ITMBPC where ITMREF_0 = @codice)>0 
+                                select ITMREFBPC_0 as 'SEAKEY_0' from PRODEKD.ITMBPC where ITMREF_0 =@codice
+                                ELSE 
+                                select  SEAKEY_0 from PRODEKD.ITMMASTER where ITMREF_0=@codice`);
+
+
+    if (recordset.length > 0) {
+      resolve({
+        CodiceEkd,
+        CodiceCliente: recordset[0].SEAKEY_0
+      })
+    } else {
+      resolve({
+        CodiceEkd,
+        CodiceCliente: undefined
+      })
+    }
+  });
+}
+
+
 function GetEkdCode(CodiceCliente) {
   return new Promise(async (resolve, reject) => {
     const db = await connection.connect();
