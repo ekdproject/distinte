@@ -41,20 +41,51 @@ app.post(
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
 
     const arrayDBBeforePromise = elements.map(async (row, index) => {
-      const EKD_CODE = await GetEkdCode(row)
-     
-      if(EKD_CODE.recordset){
+      const EKD_CODE = await GetEkdCode(row);
+
+      if (EKD_CODE.recordset) {
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
-        return distinta;
-      }else{
-        return EKD_CODE
+        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
+        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
+
+        const sll_pfl_mat = sll_pfl.map((sll) => {
+          
+          const mat_sll = materie.filter(materiale => {
+            return materiale.Padre == sll.Elemento 
+          })
+
+
+            if(mat_sll.length>0){
+                let tempObj = {
+                  Complessivo:sll.Complessivo,
+                  Padre:sll.Padre,
+                  Elemento:sll.Elemento,
+                  Materia:mat_sll[0].Elemento,
+                  Materia_code:mat_sll[0].SEAKEY_0,
+                  Descrizione1:sll.Descrizione1,
+                  Descrizione2:sll.Descrizione2,
+                  Descrizione3:sll.Descrizione3,
+                  CFGLIN_0:mat_sll[0].CFGLIN_0,
+                  Quantita:sll.Quantita,
+                  Unita:sll.Unita,
+                  fase:sll.fase
+                }      
+                return defaults(tempObj,mat_sll[0])
+            }else{
+              return sll
+            }
+        });
+       
+        return sll_pfl_mat;
+      } else {
+        return EKD_CODE;
       }
     });
-    
+
     const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
-    const undefined_number = arrayDistinte.filter(row=>{
-     return row.recordset
-    })
+    const undefined_number = arrayDistinte.filter((row) => {
+      return row.recordset;
+    });
     if(undefined_number.length > 0){
       const undefined_pn = undefined_number.map((row)=>{
         return row.CodiceCliente
@@ -66,24 +97,101 @@ app.post(
       );
   
       res.download(path.join(__dirname, "distinte.csv"));
-    }else{
-      let aconcat = [];
-      arrayDistinte.forEach((row) => {
-        aconcat = aconcat.concat(row);
-      });
-  
-      const csv = csvParser.parse(aconcat);
-      const pathNewFile = fs.writeFileSync(
-        path.join(__dirname, "distinte.csv"),
-        csv
-      );
-  
-      res.download(path.join(__dirname, "distinte.csv"));
-    }
+    }else{ 
+    let aconcat = [];
+    arrayDistinte.forEach((row) => {
+      aconcat = aconcat.concat(row);
+    });
+
+    const csv = csvParser.parse(aconcat);
+    const pathNewFile = fs.writeFileSync(
+      path.join(__dirname, "distinte.csv"),
+      csv
+    );
+
+    res.download(path.join(__dirname, "distinte.csv"));
+  }
 
   }
 );
 
+async function GetMateriePrime(ITMREF) {
+  const query = `	  with wth as 
+  (
+    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
+    union ALL
+    select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
+    from wth w
+    join PRODEKD.BOMD D on w.CPNITMREF_0 = D.ITMREF_0
+    where D.BOMALT_0='1'
+
+  )
+
+  select   '${ITMREF}' as Complessivo, wth.ITMREF_0 as Padre, wth.CPNITMREF_0 as Elemento,ITM.SEAKEY_0 ,ITM.TCLCOD_0 as Categoria,ITM.ITMDES1_0 as Descrizione1,ITMDES2_0 as Descrizione2,ITMDES3_0 as Descrizione3,ITM.CFGLIN_0,wth.BOMQTY_0 as Quantita, wth.BOMUOM_0 as Unita 
+  from wth 
+    left join PRODEKD.ITMMASTER ITM on wth.CPNITMREF_0 = ITM.ITMREF_0
+    left join (
+      select ITMREF_0, sum(QTYSTU_0) as qty
+      from PRODEKD.STOCK
+      group by ITMREF_0
+    ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
+    where BOMALT_0='1' and TCLCOD_0 in ('MPL01')
+    `;
+
+  const sage = await connection.connect();
+  const result = await sage.query(query);
+
+  const lineeBP = result.recordset.map(async (row, index) => {
+    const linee = await GetLineeProdotto(row.Elemento);
+    const ciclo = await GetPrimaFase(row.Elemento);
+
+    let tempObj = { ...row };
+
+    let unionTemp = { ...tempObj, fase: ciclo, ...linee };
+
+    return unionTemp;
+  });
+  return Promise.all(lineeBP);
+}
+
+async function GetSemilavorati(ITMREF) {
+  const query = `	  with wth as 
+  (
+    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
+    union ALL
+    select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
+    from wth w
+    join PRODEKD.BOMD D on w.CPNITMREF_0 = D.ITMREF_0
+  where D.BOMALT_0='1'
+
+  )
+
+  select   '${ITMREF}' as Complessivo, wth.ITMREF_0 as Padre, wth.CPNITMREF_0 as Elemento,ITM.SEAKEY_0 ,ITM.TCLCOD_0 as Categoria,ITM.ITMDES1_0 as Descrizione1,ITMDES2_0 as Descrizione2,ITMDES3_0 as Descrizione3,ITM.CFGLIN_0,wth.BOMQTY_0 as Quantita, wth.BOMUOM_0 as Unita 
+  from wth 
+    left join PRODEKD.ITMMASTER ITM on wth.CPNITMREF_0 = ITM.ITMREF_0
+    left join (
+      select ITMREF_0, sum(QTYSTU_0) as qty
+      from PRODEKD.STOCK
+      group by ITMREF_0
+    ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
+    where BOMALT_0='1' and TCLCOD_0 in ('PFL01','SLL01')
+    `;
+
+  const sage = await connection.connect();
+  const result = await sage.query(query);
+
+  const lineeBP = result.recordset.map(async (row, index) => {
+    const linee = await GetLineeProdotto(row.Elemento);
+    const ciclo = await GetPrimaFase(row.Elemento);
+
+    let tempObj = { ...row };
+
+    let unionTemp = { ...tempObj, fase: ciclo, ...linee };
+
+    return unionTemp;
+  });
+  return Promise.all(lineeBP);
+}
 //codice cliente
 async function GetCodiceCliente(CodiceEkd) {
   return new Promise(async (resolve, reject) => {
@@ -95,23 +203,22 @@ async function GetCodiceCliente(CodiceEkd) {
         `IF (select COUNT(ITMREFBPC_0) from PRODEKD.ITMBPC where ITMREF_0 = @codice)>0 
                                 select ITMREFBPC_0 as 'SEAKEY_0' from PRODEKD.ITMBPC where ITMREF_0 =@codice
                                 ELSE 
-                                select  SEAKEY_0 from PRODEKD.ITMMASTER where ITMREF_0=@codice`);
-
+                                select  SEAKEY_0 from PRODEKD.ITMMASTER where ITMREF_0=@codice`
+      );
 
     if (recordset.length > 0) {
       resolve({
         CodiceEkd,
-        CodiceCliente: recordset[0].SEAKEY_0
-      })
+        CodiceCliente: recordset[0].SEAKEY_0,
+      });
     } else {
       resolve({
         CodiceEkd,
-        CodiceCliente: undefined
-      })
+        CodiceCliente: undefined,
+      });
     }
   });
 }
-
 
 function GetEkdCode(CodiceCliente) {
   return new Promise(async (resolve, reject) => {
@@ -128,15 +235,14 @@ function GetEkdCode(CodiceCliente) {
 
     resolve({
       CodiceCliente,
-      recordset: recordset[0]
-    })
+      recordset: recordset[0],
+    });
     /*  if (recordset.length == 0) {
        fileText += `${e},inesistente\r\n`;
      } else {
        fileText += `${e},${recordset[0].ITMREF_0}\r\n`;
      }
 */
-
   });
 }
 
@@ -188,7 +294,7 @@ async function GetDistintaBase(ITMREF, in_production) {
 
     let tempObj = { ...row };
 
-    let unionTemp = { ...tempObj, fase: ciclo,...linee };
+    let unionTemp = { ...tempObj, fase: ciclo, ...linee };
 
     return unionTemp;
   });
