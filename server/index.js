@@ -49,33 +49,31 @@ app.post(
         const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
 
         const sll_pfl_mat = sll_pfl.map((sll) => {
-          
-          const mat_sll = materie.filter(materiale => {
-            return materiale.Padre == sll.Elemento 
-          })
+          const mat_sll = materie.filter((materiale) => {
+            return materiale.Padre == sll.Elemento;
+          });
 
-
-            if(mat_sll.length>0){
-                let tempObj = {
-                  Complessivo:sll.Complessivo,
-                  Padre:sll.Padre,
-                  Elemento:sll.Elemento,
-                  Materia:mat_sll[0].Elemento,
-                  Materia_code:mat_sll[0].SEAKEY_0,
-                  Descrizione1:sll.Descrizione1,
-                  Descrizione2:sll.Descrizione2,
-                  Descrizione3:sll.Descrizione3,
-                  CFGLIN_0:mat_sll[0].CFGLIN_0,
-                  Quantita:sll.Quantita,
-                  Unita:sll.Unita,
-                  fase:sll.fase
-                }      
-                return defaults(tempObj,mat_sll[0])
-            }else{
-              return sll
-            }
+          if (mat_sll.length > 0) {
+            let tempObj = {
+              Complessivo: sll.Complessivo,
+              Padre: sll.Padre,
+              Elemento: sll.Elemento,
+              Materia: mat_sll[0].Elemento,
+              Materia_code: mat_sll[0].SEAKEY_0,
+              Descrizione1: sll.Descrizione1,
+              Descrizione2: sll.Descrizione2,
+              Descrizione3: sll.Descrizione3,
+              CFGLIN_0: mat_sll[0].CFGLIN_0,
+              Quantita: sll.Quantita,
+              Unita: sll.Unita,
+              fase: sll.fase,
+            };
+            return defaults(tempObj, mat_sll[0]);
+          } else {
+            return sll;
+          }
         });
-       
+
         return sll_pfl_mat;
       } else {
         return EKD_CODE;
@@ -86,32 +84,51 @@ app.post(
     const undefined_number = arrayDistinte.filter((row) => {
       return row.recordset;
     });
-    if(undefined_number.length > 0){
-      const undefined_pn = undefined_number.map((row)=>{
-        return row.CodiceCliente
-      })
-      
+    if (undefined_number.length > 0) {
+      const undefined_pn = undefined_number.map((row) => {
+        return row.CodiceCliente;
+      });
+
       const pathNewFile = fs.writeFileSync(
         path.join(__dirname, "distinte.csv"),
-        undefined_pn.join(',').toString()
+        undefined_pn.join(",").toString()
       );
-  
+
       res.download(path.join(__dirname, "distinte.csv"));
-    }else{ 
-    let aconcat = [];
-    arrayDistinte.forEach((row) => {
-      aconcat = aconcat.concat(row);
-    });
+    } else {
+      let aconcat = [];
 
-    const csv = csvParser.parse(aconcat);
-    const pathNewFile = fs.writeFileSync(
-      path.join(__dirname, "distinte.csv"),
-      csv
-    );
+      arrayDistinte.forEach((row) => {
+        aconcat = aconcat.concat(row);
+      });
 
-    res.download(path.join(__dirname, "distinte.csv"));
-  }
+      const codeArrayDistinte = aconcat.map(async (row) => {
+        const codice_complessivo = (await GetCodiceCliente(row.Complessivo))
+          .CodiceCliente;
+        const codice_padre = (await GetCodiceCliente(row.Padre)).CodiceCliente;
+        const codice_elemento = (await GetCodiceCliente(row.Elemento))
+          .CodiceCliente;
+        const tempRow = {
+          Complessivo: row.Complessivo,
+          Complessivo_cliente: codice_complessivo,
+          Padre: row.Padre,
+          Padre_cliente: codice_padre,
+          Elemento: row.Elemento,
+          Elemento_cliente: codice_elemento,
+        };
+        return defaults(tempRow, row);
+      });
 
+      const codeArrayDistintePost = await Promise.all(codeArrayDistinte)
+
+      const csv = csvParser.parse(codeArrayDistintePost);
+      const pathNewFile = fs.writeFileSync(
+        path.join(__dirname, "distinte.csv"),
+        csv
+      );
+
+      res.download(path.join(__dirname, "distinte.csv"));
+    }
   }
 );
 
@@ -195,7 +212,7 @@ async function GetSemilavorati(ITMREF) {
 //codice cliente
 async function GetCodiceCliente(CodiceEkd) {
   return new Promise(async (resolve, reject) => {
-    const db = await sage.connect();
+    const db = await connection.connect();
     const { recordset } = await db
       .request()
       .input("codice", CodiceEkd)
