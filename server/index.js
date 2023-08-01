@@ -60,6 +60,8 @@ app.post(
               Elemento: sll.Elemento,
               Materia: mat_sll[0].Elemento,
               Materia_code: mat_sll[0].SEAKEY_0,
+              Quantita_materia:mat_sll[0].Quantita,
+              Unita_materia:mat_sll[0].Unita,
               Descrizione1: sll.Descrizione1,
               Descrizione2: sll.Descrizione2,
               Descrizione3: sll.Descrizione3,
