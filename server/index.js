@@ -39,7 +39,7 @@ app.post(
     const filePath = path.resolve(req.file.path);
 
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
-
+    
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
 
@@ -54,13 +54,14 @@ app.post(
           });
 
           if (mat_sll.length > 0) {
+            console.log(Number(mat_sll[0].Quantita).toFixed(2));
             let tempObj = {
               Complessivo: sll.Complessivo,
               Padre: sll.Padre,
               Elemento: sll.Elemento,
               Materia: mat_sll[0].Elemento,
               Materia_code: mat_sll[0].SEAKEY_0,
-              Quantita_materia:mat_sll[0].Quantita,
+              Quantita_materia:Number(mat_sll[0].Quantita).toFixed(2),
               Unita_materia:mat_sll[0].Unita,
               Descrizione1: sll.Descrizione1,
               Descrizione2: sll.Descrizione2,
