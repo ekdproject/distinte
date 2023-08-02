@@ -39,45 +39,50 @@ app.post(
     const filePath = path.resolve(req.file.path);
 
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
-    
+
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
-
       if (EKD_CODE.recordset) {
+
+
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
         const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
         const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
 
-        const sll_pfl_mat = sll_pfl.map((sll) => {
-          const mat_sll = materie.filter((materiale) => {
-            return materiale.Padre == sll.Elemento;
+        if(sll_pfl.length == 0 && materie.length>0){
+          return distinta
+        }else{
+          const sll_pfl_mat = sll_pfl.map((sll) => {
+            const mat_sll = materie.filter((materiale) => {
+              return materiale.Padre == sll.Elemento;
+            });
+  
+            if (mat_sll.length > 0) {
+              
+              let tempObj = {
+                Complessivo: sll.Complessivo,
+                Padre: sll.Padre,
+                Elemento: sll.Elemento,
+                Materia: mat_sll[0].Elemento,
+                Materia_code: mat_sll[0].SEAKEY_0,
+                Quantita_materia:Number(mat_sll[0].Quantita).toFixed(2),
+                Unita_materia:mat_sll[0].Unita,
+                Descrizione1: sll.Descrizione1,
+                Descrizione2: sll.Descrizione2,
+                Descrizione3: sll.Descrizione3,
+                CFGLIN_0: mat_sll[0].CFGLIN_0,
+                Quantita: sll.Quantita,
+                Unita: sll.Unita,
+                fase: sll.fase,
+              };
+              return defaults(tempObj, mat_sll[0]);
+            } else {
+              return sll;
+            }
           });
-
-          if (mat_sll.length > 0) {
-            console.log(Number(mat_sll[0].Quantita).toFixed(2));
-            let tempObj = {
-              Complessivo: sll.Complessivo,
-              Padre: sll.Padre,
-              Elemento: sll.Elemento,
-              Materia: mat_sll[0].Elemento,
-              Materia_code: mat_sll[0].SEAKEY_0,
-              Quantita_materia:Number(mat_sll[0].Quantita).toFixed(2),
-              Unita_materia:mat_sll[0].Unita,
-              Descrizione1: sll.Descrizione1,
-              Descrizione2: sll.Descrizione2,
-              Descrizione3: sll.Descrizione3,
-              CFGLIN_0: mat_sll[0].CFGLIN_0,
-              Quantita: sll.Quantita,
-              Unita: sll.Unita,
-              fase: sll.fase,
-            };
-            return defaults(tempObj, mat_sll[0]);
-          } else {
-            return sll;
-          }
-        });
-
-        return sll_pfl_mat;
+  
+          return sll_pfl_mat;
+        }
       } else {
         return EKD_CODE;
       }
