@@ -72,6 +72,7 @@ app.post(
                 fase: dis.fase,
               };
               return defaults(tempObj, mat_sll[0]);
+              
             } else {
 
               let tempObj = {
@@ -86,11 +87,11 @@ app.post(
                 Descrizione2: dis.Descrizione2,
                 Descrizione3: dis.Descrizione3,
                 CFGLIN_0: dis.CFGLIN_0,
-                Quantita: '',
-                Unita: '',
+                Quantita: 1,
+                Unita: 'PZ',
                 fase: dis.fase,
               };
-              
+              console.log(distinta);
               return defaults(tempObj,dis);
             }
           })
