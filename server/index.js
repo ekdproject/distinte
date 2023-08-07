@@ -359,7 +359,7 @@ async function GetDistintaBase(ITMREF, in_production) {
 
   const lineeBP = result.recordset.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
-    const ciclo = await GetPrimaFase(row.Elemento);
+    const ciclo = await GetPrimaFase(row.Complessivo);
     
     let tempObj = { ...row };
 
