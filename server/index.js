@@ -39,7 +39,7 @@ app.post(
     const filePath = path.resolve(req.file.path);
 
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
-    
+
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
 
@@ -48,36 +48,84 @@ app.post(
         const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
         const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
 
-        const sll_pfl_mat = sll_pfl.map((sll) => {
-          const mat_sll = materie.filter((materiale) => {
-            return materiale.Padre == sll.Elemento;
+        if (sll_pfl.length == 0 && materie.length > 0) {
+         const dis_mat = distinta.map(dis=>{
+            const mat_sll = materie.filter((materiale) => {
+              return materiale.Padre == dis.Elemento;
+            });
+
+            if (mat_sll.length > 0) {
+              let tempObj = {
+                Complessivo: dis.Complessivo,
+                Padre: dis.Padre,
+                Elemento: dis.Elemento,
+                Materia: mat_sll[0].Elemento,
+                Materia_code: mat_sll[0].SEAKEY_0,
+                Quantita_materia: Number(mat_sll[0].Quantita).toFixed(2),
+                Unita_materia: mat_sll[0].Unita,
+                Descrizione1: dis.Descrizione1,
+                Descrizione2: dis.Descrizione2,
+                Descrizione3: dis.Descrizione3,
+                CFGLIN_0: mat_sll[0].CFGLIN_0,
+                Quantita: dis.Quantita,
+                Unita: dis.Unita,
+                fase: dis.fase,
+              };
+              return defaults(tempObj, mat_sll[0]);
+            } else {
+
+              let tempObj = {
+                Complessivo: dis.Complessivo,
+                Padre: dis.Padre,
+                Elemento: dis.Elemento,
+                Materia: dis.Elemento,
+                Materia_code: dis.SEAKEY_0,
+                Quantita_materia: Number(dis.Quantita).toFixed(2),
+                Unita_materia: dis.Unita,
+                Descrizione1: dis.Descrizione1,
+                Descrizione2: dis.Descrizione2,
+                Descrizione3: dis.Descrizione3,
+                CFGLIN_0: dis.CFGLIN_0,
+                Quantita: '',
+                Unita: '',
+                fase: dis.fase,
+              };
+              
+              return defaults(tempObj,dis);
+            }
+          })
+          return dis_mat;
+        } else {
+          const sll_pfl_mat = sll_pfl.map((sll) => {
+            const mat_sll = materie.filter((materiale) => {
+              return materiale.Padre == sll.Elemento;
+            });
+
+            if (mat_sll.length > 0) {
+              let tempObj = {
+                Complessivo: sll.Complessivo,
+                Padre: sll.Padre,
+                Elemento: sll.Elemento,
+                Materia: mat_sll[0].Elemento,
+                Materia_code: mat_sll[0].SEAKEY_0,
+                Quantita_materia: Number(mat_sll[0].Quantita).toFixed(2),
+                Unita_materia: mat_sll[0].Unita,
+                Descrizione1: sll.Descrizione1,
+                Descrizione2: sll.Descrizione2,
+                Descrizione3: sll.Descrizione3,
+                CFGLIN_0: mat_sll[0].CFGLIN_0,
+                Quantita: sll.Quantita,
+                Unita: sll.Unita,
+                fase: sll.fase,
+              };
+              return defaults(tempObj, mat_sll[0]);
+            } else {
+              return sll;
+            }
           });
 
-          if (mat_sll.length > 0) {
-            console.log(Number(mat_sll[0].Quantita).toFixed(2));
-            let tempObj = {
-              Complessivo: sll.Complessivo,
-              Padre: sll.Padre,
-              Elemento: sll.Elemento,
-              Materia: mat_sll[0].Elemento,
-              Materia_code: mat_sll[0].SEAKEY_0,
-              Quantita_materia:Number(mat_sll[0].Quantita).toFixed(2),
-              Unita_materia:mat_sll[0].Unita,
-              Descrizione1: sll.Descrizione1,
-              Descrizione2: sll.Descrizione2,
-              Descrizione3: sll.Descrizione3,
-              CFGLIN_0: mat_sll[0].CFGLIN_0,
-              Quantita: sll.Quantita,
-              Unita: sll.Unita,
-              fase: sll.fase,
-            };
-            return defaults(tempObj, mat_sll[0]);
-          } else {
-            return sll;
-          }
-        });
-
-        return sll_pfl_mat;
+          return sll_pfl_mat;
+        }
       } else {
         return EKD_CODE;
       }
@@ -85,6 +133,7 @@ app.post(
 
     const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
     const undefined_number = arrayDistinte.filter((row) => {
+   //   console.log(row);
       return row.recordset;
     });
     if (undefined_number.length > 0) {
@@ -122,7 +171,7 @@ app.post(
         return defaults(tempRow, row);
       });
 
-      const codeArrayDistintePost = await Promise.all(codeArrayDistinte)
+      const codeArrayDistintePost = await Promise.all(codeArrayDistinte);
 
       const csv = csvParser.parse(codeArrayDistintePost);
       const pathNewFile = fs.writeFileSync(
@@ -155,7 +204,7 @@ async function GetMateriePrime(ITMREF) {
       from PRODEKD.STOCK
       group by ITMREF_0
     ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-    where BOMALT_0='1' and TCLCOD_0 in ('MPL01')
+    where BOMALT_0='1' and TCLCOD_0 in ('MPL01') 
     `;
 
   const sage = await connection.connect();
@@ -302,7 +351,7 @@ async function GetDistintaBase(ITMREF, in_production) {
         from PRODEKD.STOCK
         group by ITMREF_0
       ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-      where BOMALT_0='1'
+      where BOMALT_0='1' and wth.CPNITMREF_0 not like 'SER%'
       `;
 
   const sage = await connection.connect();
@@ -311,7 +360,7 @@ async function GetDistintaBase(ITMREF, in_production) {
   const lineeBP = result.recordset.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
     const ciclo = await GetPrimaFase(row.Elemento);
-
+    
     let tempObj = { ...row };
 
     let unionTemp = { ...tempObj, fase: ciclo, ...linee };

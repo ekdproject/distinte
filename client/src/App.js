@@ -27,7 +27,7 @@ function App() {
             }
             fd.append('elementi', file)
             setLoading(true)
-            axios.post('http://192.168.2.212:5004/distinta_base/multiple', fd).then(res => {
+            axios.post('http://localhost:5004/distinta_base/multiple', fd).then(res => {
               const url = URL.createObjectURL(new Blob([res.data]));
               const link = document.createElement("a");
               link.href = url;
