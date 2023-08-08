@@ -38,8 +38,6 @@ function App() {
               document.body.removeChild(link)
               setLoading(false)
             })
-      
-    
         }}
       >
         Invia
