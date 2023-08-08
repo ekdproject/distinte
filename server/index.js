@@ -136,7 +136,7 @@ app.post(
     const undefined_number = arrayDistinte.filter((row) => {
       return row.recordset;
     });
-    if (undefined_number.length > 0) {
+/*     if (undefined_number.length > 0) {
       const undefined_pn = undefined_number.map((row) => {
         return row.CodiceCliente;
       });
@@ -147,7 +147,7 @@ app.post(
       );
 
       res.download(path.join(__dirname, "distinte.csv"));
-    } else {
+    } else { */
       let aconcat = [];
 
       arrayDistinte.forEach((row) => {
@@ -180,7 +180,7 @@ app.post(
       );
 
       res.download(path.join(__dirname, "distinte.csv"));
-    }
+ //   }
   }
 );
 
