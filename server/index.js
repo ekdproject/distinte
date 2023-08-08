@@ -43,13 +43,14 @@ app.post(
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
 
+
       if (EKD_CODE.recordset) {
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
         const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
         const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
 
         if (sll_pfl.length == 0 && materie.length > 0) {
-         const dis_mat = distinta.map(dis=>{
+          const dis_mat = distinta.map(dis => {
             const mat_sll = materie.filter((materiale) => {
               return materiale.Padre == dis.Elemento;
             });
@@ -72,7 +73,7 @@ app.post(
                 fase: dis.fase,
               };
               return defaults(tempObj, mat_sll[0]);
-              
+
             } else {
 
               let tempObj = {
@@ -91,8 +92,7 @@ app.post(
                 Unita: 'PZ',
                 fase: dis.fase,
               };
-              console.log(distinta);
-              return defaults(tempObj,dis);
+              return defaults(tempObj, dis);
             }
           })
           return dis_mat;
@@ -134,7 +134,6 @@ app.post(
 
     const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
     const undefined_number = arrayDistinte.filter((row) => {
-   //   console.log(row);
       return row.recordset;
     });
     if (undefined_number.length > 0) {
@@ -361,7 +360,7 @@ async function GetDistintaBase(ITMREF, in_production) {
   const lineeBP = result.recordset.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
     const ciclo = await GetPrimaFase(row.Complessivo);
-    
+
     let tempObj = { ...row };
 
     let unionTemp = { ...tempObj, fase: ciclo, ...linee };
