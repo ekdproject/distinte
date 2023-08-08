@@ -42,12 +42,14 @@ app.post(
 
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
-
+      console.log(EKD_CODE);
 
       if (EKD_CODE.recordset) {
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
         const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
         const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
+
+
 
         if (sll_pfl.length == 0 && materie.length > 0) {
           const dis_mat = distinta.map(dis => {
@@ -136,7 +138,7 @@ app.post(
     const undefined_number = arrayDistinte.filter((row) => {
       return row.recordset;
     });
-/*     if (undefined_number.length > 0) {
+    if (undefined_number.length > 0) {
       const undefined_pn = undefined_number.map((row) => {
         return row.CodiceCliente;
       });
@@ -147,7 +149,7 @@ app.post(
       );
 
       res.download(path.join(__dirname, "distinte.csv"));
-    } else { */
+    } else {
       let aconcat = [];
 
       arrayDistinte.forEach((row) => {
@@ -180,7 +182,7 @@ app.post(
       );
 
       res.download(path.join(__dirname, "distinte.csv"));
- //   }
+    }
   }
 );
 
@@ -269,10 +271,10 @@ async function GetCodiceCliente(CodiceEkd) {
       .request()
       .input("codice", CodiceEkd)
       .query(
-        `IF (select COUNT(ITMREFBPC_0) from PRODEKD.ITMBPC where ITMREF_0 = @codice)>0 
-                                select ITMREFBPC_0 as 'SEAKEY_0' from PRODEKD.ITMBPC where ITMREF_0 =@codice
-                                ELSE 
-                                select  SEAKEY_0 from PRODEKD.ITMMASTER where ITMREF_0=@codice`
+        `IF (select  COUNT(SEAKEY_0) from PRODEKD.ITMMASTER where ITMREF_0=@codice)>0 
+            select  SEAKEY_0 from PRODEKD.ITMMASTER where ITMREF_0=@codice
+               ELSE 
+            select ITMREFBPC_0 as 'SEAKEY_0' from PRODEKD.ITMBPC where ITMREF_0 =@codice`
       );
 
     if (recordset.length > 0) {
