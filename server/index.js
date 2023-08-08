@@ -42,7 +42,6 @@ app.post(
 
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
-      console.log(EKD_CODE);
 
       if (EKD_CODE.recordset) {
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
