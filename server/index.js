@@ -174,7 +174,7 @@ app.post(
       });
 
       const codeArrayDistintePost = await Promise.all(codeArrayDistinte);
-
+      console.log(codeArrayDistintePost);
       const csv = csvParser.parse(codeArrayDistintePost);
       const pathNewFile = fs.writeFileSync(
         path.join(__dirname, "distinte.csv"),
