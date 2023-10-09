@@ -39,14 +39,14 @@ app.post(
     const filePath = path.resolve(req.file.path);
 
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
-
+    
     const arrayDBBeforePromise = elements.map(async (row, index) => {
-      const EKD_CODE = await GetEkdCode(row);
+      const EKD_CODE = await GetEkdCode(row.complessivo);
 
       if (EKD_CODE.recordset) {
-        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0,2);
-        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0,2);
-        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0,2);
+        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0,1);
+        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0,1);
+        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0,1);
 
 
 
