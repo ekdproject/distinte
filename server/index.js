@@ -45,7 +45,7 @@ app.post(
 
       if (EKD_CODE.recordset) {
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0,1);
-        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0,1);
+        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
         const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0,1);
 
 
@@ -63,7 +63,7 @@ app.post(
                 Elemento: dis.Elemento,
                 Materia: mat_sll[0].Elemento,
                 Materia_code: mat_sll[0].SEAKEY_0,
-                Quantita_materia: Number(mat_sll[0].Quantita).toFixed(2),
+                Quantita_materia: (Number(mat_sll[0].Quantita)*Number(dis.Quantita)).toLocaleString(),
                 Unita_materia: mat_sll[0].Unita,
                 Descrizione1: dis.Descrizione1,
                 Descrizione2: dis.Descrizione2,
@@ -83,7 +83,7 @@ app.post(
                 Elemento: dis.Elemento,
                 Materia: dis.Elemento,
                 Materia_code: dis.SEAKEY_0,
-                Quantita_materia: Number(dis.Quantita).toFixed(2),
+                Quantita_materia: Number(dis.Quantita).toLocaleString(),
                 Unita_materia: dis.Unita,
                 Descrizione1: dis.Descrizione1,
                 Descrizione2: dis.Descrizione2,
@@ -110,7 +110,7 @@ app.post(
                 Elemento: sll.Elemento,
                 Materia: mat_sll[0].Elemento,
                 Materia_code: mat_sll[0].SEAKEY_0,
-                Quantita_materia: Number(mat_sll[0].Quantita).toFixed(2),
+                Quantita_materia: (Number(mat_sll[0].Quantita) * Number(sll.Quantita)).toLocaleString(),
                 Unita_materia: mat_sll[0].Unita,
                 Descrizione1: sll.Descrizione1,
                 Descrizione2: sll.Descrizione2,
@@ -186,8 +186,7 @@ app.post(
     }
   }
 );
-
-async function GetMateriePrime(ITMREF,in_production) {
+async function GetMateriePrime(ITMREF) {
   const query = `	  with wth as 
   (
     select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
@@ -213,29 +212,7 @@ async function GetMateriePrime(ITMREF,in_production) {
   const sage = await connection.connect();
   const result = await sage.query(query);
 
-  let distinta = [...result.recordset];
-  let after = [];
-  _.each(distinta, (row) => {
-    let tempRow = { ...row };
-    const filterDistinta = _.filter(
-      distinta,
-      (r) => row.Complessivo === r.Elemento
-    );
-    const checkNewArray = _.filter(after, (r) => row.Complessivo === r.Elemento);
-    if (checkNewArray.length > 0) {
-      tempRow.Quantita = row.Quantita * checkNewArray[0].Quantita;
-    } else {
-      if (filterDistinta.length > 0) {
-        tempRow.Quantita = row.Quantita * filterDistinta[0].Quantita * in_production;
-      } else {
-        tempRow.Quantita = row.Quantita * in_production;
-      }
-    }
-    tempRow.Quantita = Number(tempRow.Quantita)
-    after.push(tempRow);
-  });
-
-  const lineeBP = after.map(async (row, index) => {
+  const lineeBP = result.recordset.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
     const ciclo = await GetPrimaFase(row.Elemento);
 
@@ -247,6 +224,7 @@ async function GetMateriePrime(ITMREF,in_production) {
   });
   return Promise.all(lineeBP);
 }
+
 
 async function GetSemilavorati(ITMREF,in_production) {
   const query = `	  with wth as 
