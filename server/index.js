@@ -44,9 +44,9 @@ app.post(
       const EKD_CODE = await GetEkdCode(row);
 
       if (EKD_CODE.recordset) {
-        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0);
-        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
-        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0);
+        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0,2);
+        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0,2);
+        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0,2);
 
 
 
@@ -134,9 +134,11 @@ app.post(
     });
 
     const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
+
     const undefined_number = arrayDistinte.filter((row) => {
       return row.recordset;
     });
+
     if (undefined_number.length > 0) {
       const undefined_pn = undefined_number.map((row) => {
         return row.CodiceCliente;
@@ -146,7 +148,6 @@ app.post(
         path.join(__dirname, "distinte.csv"),
         undefined_pn.join(",").toString()
       );
-
       res.download(path.join(__dirname, "distinte.csv"));
     } else {
       let aconcat = [];
@@ -179,13 +180,14 @@ app.post(
         path.join(__dirname, "distinte.csv"),
         csv
       );
-
+      //res.json(codeArrayDistintePost)
+       
       res.download(path.join(__dirname, "distinte.csv"));
     }
   }
 );
 
-async function GetMateriePrime(ITMREF) {
+async function GetMateriePrime(ITMREF,in_production) {
   const query = `	  with wth as 
   (
     select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
@@ -211,7 +213,29 @@ async function GetMateriePrime(ITMREF) {
   const sage = await connection.connect();
   const result = await sage.query(query);
 
-  const lineeBP = result.recordset.map(async (row, index) => {
+  let distinta = [...result.recordset];
+  let after = [];
+  _.each(distinta, (row) => {
+    let tempRow = { ...row };
+    const filterDistinta = _.filter(
+      distinta,
+      (r) => row.Complessivo === r.Elemento
+    );
+    const checkNewArray = _.filter(after, (r) => row.Complessivo === r.Elemento);
+    if (checkNewArray.length > 0) {
+      tempRow.Quantita = row.Quantita * checkNewArray[0].Quantita;
+    } else {
+      if (filterDistinta.length > 0) {
+        tempRow.Quantita = row.Quantita * filterDistinta[0].Quantita * in_production;
+      } else {
+        tempRow.Quantita = row.Quantita * in_production;
+      }
+    }
+    tempRow.Quantita = Number(tempRow.Quantita)
+    after.push(tempRow);
+  });
+
+  const lineeBP = after.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
     const ciclo = await GetPrimaFase(row.Elemento);
 
@@ -224,7 +248,7 @@ async function GetMateriePrime(ITMREF) {
   return Promise.all(lineeBP);
 }
 
-async function GetSemilavorati(ITMREF) {
+async function GetSemilavorati(ITMREF,in_production) {
   const query = `	  with wth as 
   (
     select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
@@ -249,8 +273,28 @@ async function GetSemilavorati(ITMREF) {
 
   const sage = await connection.connect();
   const result = await sage.query(query);
-
-  const lineeBP = result.recordset.map(async (row, index) => {
+  let distinta = [...result.recordset];
+  let after = [];
+  _.each(distinta, (row) => {
+    let tempRow = { ...row };
+    const filterDistinta = _.filter(
+      distinta,
+      (r) => row.Complessivo === r.Elemento
+    );
+    const checkNewArray = _.filter(after, (r) => row.Complessivo === r.Elemento);
+    if (checkNewArray.length > 0) {
+      tempRow.Quantita = row.Quantita * checkNewArray[0].Quantita;
+    } else {
+      if (filterDistinta.length > 0) {
+        tempRow.Quantita = row.Quantita * filterDistinta[0].Quantita * in_production;
+      } else {
+        tempRow.Quantita = row.Quantita * in_production;
+      }
+    }
+    tempRow.Quantita = Number(tempRow.Quantita)
+    after.push(tempRow);
+  });
+  const lineeBP = after.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
     const ciclo = await GetPrimaFase(row.Elemento);
 
@@ -357,13 +401,32 @@ async function GetDistintaBase(ITMREF, in_production) {
 
   const sage = await connection.connect();
   const result = await sage.query(query);
-
-  const lineeBP = result.recordset.map(async (row, index) => {
+  let distinta = [...result.recordset];
+  let after = [];
+  _.each(distinta, (row) => {
+    let tempRow = { ...row };
+    const filterDistinta = _.filter(
+      distinta,
+      (r) => row.Complessivo === r.Elemento
+    );
+    const checkNewArray = _.filter(after, (r) => row.Complessivo === r.Elemento);
+    if (checkNewArray.length > 0) {
+      tempRow.Quantita = row.Quantita * checkNewArray[0].Quantita;
+    } else {
+      if (filterDistinta.length > 0) {
+        tempRow.Quantita = row.Quantita * filterDistinta[0].Quantita * in_production;
+      } else {
+        tempRow.Quantita = row.Quantita * in_production;
+      }
+    }
+    tempRow.Quantita = Number(tempRow.Quantita)
+    after.push(tempRow);
+  });
+  const lineeBP = after.map(async (row, index) => {
     const linee = await GetLineeProdotto(row.Elemento);
     const ciclo = await GetPrimaFase(row.Complessivo);
 
     let tempObj = { ...row };
-
     let unionTemp = { ...tempObj, fase: ciclo, ...linee };
 
     return unionTemp;
