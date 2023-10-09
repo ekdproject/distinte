@@ -41,7 +41,7 @@ app.post(
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
     
     const arrayDBBeforePromise = elements.map(async (row, index) => {
-      const EKD_CODE = await GetEkdCode(row.complessivo);
+      const EKD_CODE = await GetEkdCode(row);
 
       if (EKD_CODE.recordset) {
         const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0,1);
