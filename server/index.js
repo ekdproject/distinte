@@ -174,7 +174,7 @@ app.post(
       });
 
       const codeArrayDistintePost = await Promise.all(codeArrayDistinte);
-      console.log(codeArrayDistintePost);
+   
       const csv = csvParser.parse(codeArrayDistintePost);
       const pathNewFile = fs.writeFileSync(
         path.join(__dirname, "distinte.csv"),
@@ -506,5 +506,6 @@ async function GetStatistico2(elemento) {
 }
 
 app.listen(5004, () => {
+  console.log('modifica fatta');
   console.log("http://localhost:5004");
 });
