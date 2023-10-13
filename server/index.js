@@ -181,7 +181,7 @@ app.post(
         csv
       );
       //res.json(codeArrayDistintePost)
-       
+       console.log(csv);
       res.download(path.join(__dirname, "distinte.csv"));
     }
   }
@@ -464,7 +464,7 @@ async function GetLineeProdotto(elemento) {
           lb.filter((lbk) => {
             return lbk.LANNUM_0 == lp.recordset[0][key];
           })[0].LANMES_0
-        ] = values.recordset[0][Object.keys(values.recordset[0])[index]];
+        ] =Number( values.recordset[0][Object.keys(values.recordset[0])[index]]).toLocaleString();
       });
 
       const te = defaults(temp, model);
@@ -506,6 +506,6 @@ async function GetStatistico2(elemento) {
 }
 
 app.listen(5004, () => {
-  console.log('modifica fatta');
+  console.log('modifica');
   console.log("http://localhost:5004");
 });
