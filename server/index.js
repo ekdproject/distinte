@@ -12,6 +12,20 @@ const fs = require("fs");
 const csvParser = new Parser({
   delimiter: ";",
 });
+function jsonToCsv(items) {
+  const header = Object.keys(_.maxBy(items,(i)=>Object.keys(i).length));
+  const headerString = header.join(';');
+  // handle null or undefined values here
+  const replacer = (key, value) => value ?? '';
+  const rowItems = items.map((row) =>
+    header
+      .map((fieldName) => JSON.stringify(row[fieldName], replacer))
+      .join(';')
+  );
+  // join header and body, and break into separate lines
+  const csv = [headerString, ...rowItems].join('\r\n');
+  return csv;
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -39,14 +53,14 @@ app.post(
     const filePath = path.resolve(req.file.path);
 
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
-    
+
     const arrayDBBeforePromise = elements.map(async (row, index) => {
       const EKD_CODE = await GetEkdCode(row);
 
       if (EKD_CODE.recordset) {
-        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0,1);
+        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0, 1);
         const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
-        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0,1);
+        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0, 1);
 
 
 
@@ -63,7 +77,7 @@ app.post(
                 Elemento: dis.Elemento,
                 Materia: mat_sll[0].Elemento,
                 Materia_code: mat_sll[0].SEAKEY_0,
-                Quantita_materia: (Number(mat_sll[0].Quantita)*Number(dis.Quantita)).toLocaleString(),
+                Quantita_materia: (Number(mat_sll[0].Quantita) * Number(dis.Quantita)).toLocaleString(),
                 Unita_materia: mat_sll[0].Unita,
                 Descrizione1: dis.Descrizione1,
                 Descrizione2: dis.Descrizione2,
@@ -125,7 +139,6 @@ app.post(
               return sll;
             }
           });
-
           return sll_pfl_mat;
         }
       } else {
@@ -170,18 +183,26 @@ app.post(
           Elemento: row.Elemento,
           Elemento_cliente: codice_elemento,
         };
+
         return defaults(tempRow, row);
       });
 
       const codeArrayDistintePost = await Promise.all(codeArrayDistinte);
-   
+
+      codeArrayDistintePost.forEach(e => {
+        if (!Object.keys(e)[Object.keys(e).length - 1] == 'materiale') {
+          //   console.log(e);
+        }
+      })
       const csv = csvParser.parse(codeArrayDistintePost);
+      const csv1 = jsonToCsv(codeArrayDistintePost)
+      console.log();
       const pathNewFile = fs.writeFileSync(
         path.join(__dirname, "distinte.csv"),
-        csv
+        csv1
       );
       //res.json(codeArrayDistintePost)
-       console.log(csv);
+      //       console.log(csv);
       res.download(path.join(__dirname, "distinte.csv"));
     }
   }
@@ -189,12 +210,12 @@ app.post(
 async function GetMateriePrime(ITMREF) {
   const query = `	  with wth as 
   (
-    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
+    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='2'
     union ALL
     select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
     from wth w
     join PRODEKD.BOMD D on w.CPNITMREF_0 = D.ITMREF_0
-    where D.BOMALT_0='1'
+    where D.BOMALT_0='2'
 
   )
 
@@ -206,7 +227,7 @@ async function GetMateriePrime(ITMREF) {
       from PRODEKD.STOCK
       group by ITMREF_0
     ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-    where BOMALT_0='1' and TCLCOD_0 in ('MPL01') 
+    where BOMALT_0='2' and TCLCOD_0 in ('MPL01') 
     `;
 
   const sage = await connection.connect();
@@ -226,15 +247,15 @@ async function GetMateriePrime(ITMREF) {
 }
 
 
-async function GetSemilavorati(ITMREF,in_production) {
+async function GetSemilavorati(ITMREF, in_production) {
   const query = `	  with wth as 
   (
-    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='1'
+    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='2'
     union ALL
     select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
     from wth w
     join PRODEKD.BOMD D on w.CPNITMREF_0 = D.ITMREF_0
-  where D.BOMALT_0='1'
+  where D.BOMALT_0='2'
 
   )
 
@@ -246,7 +267,7 @@ async function GetSemilavorati(ITMREF,in_production) {
       from PRODEKD.STOCK
       group by ITMREF_0
     ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-    where BOMALT_0='1' and TCLCOD_0 in ('PFL01','SLL01')
+    where BOMALT_0='2' and TCLCOD_0 in ('PFL01','SLL01')
     `;
 
   const sage = await connection.connect();
@@ -257,7 +278,7 @@ async function GetSemilavorati(ITMREF,in_production) {
     let tempRow = { ...row };
     const filterDistinta = _.filter(
       distinta,
-      (r) => row.Complessivo === r.Elemento
+      (r) => row.Padre === r.Elemento
     );
     const checkNewArray = _.filter(after, (r) => row.Complessivo === r.Elemento);
     if (checkNewArray.length > 0) {
@@ -374,7 +395,7 @@ async function GetDistintaBase(ITMREF, in_production) {
         from PRODEKD.STOCK
         group by ITMREF_0
       ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-      where BOMALT_0='1' and wth.CPNITMREF_0 not like 'SER%'
+      where BOMALT_0='2' and wth.CPNITMREF_0 not like 'SER%'
       `;
 
   const sage = await connection.connect();
@@ -464,7 +485,7 @@ async function GetLineeProdotto(elemento) {
           lb.filter((lbk) => {
             return lbk.LANNUM_0 == lp.recordset[0][key];
           })[0].LANMES_0
-        ] =Number( values.recordset[0][Object.keys(values.recordset[0])[index]]).toLocaleString();
+        ] = Number(values.recordset[0][Object.keys(values.recordset[0])[index]]).toLocaleString();
       });
 
       const te = defaults(temp, model);
