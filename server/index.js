@@ -13,7 +13,7 @@ const csvParser = new Parser({
   delimiter: ";",
 });
 function jsonToCsv(items) {
-  const header = Object.keys(_.maxBy(items,(i)=>Object.keys(i).length));
+  const header = Object.keys(_.maxBy(items, (i) => Object.keys(i).length));
   const headerString = header.join(';');
   // handle null or undefined values here
   const replacer = (key, value) => value ?? '';
@@ -55,95 +55,106 @@ app.post(
     const elements = fs.readFileSync(filePath).toString().split("\r\n");
 
     const arrayDBBeforePromise = elements.map(async (row, index) => {
-      const EKD_CODE = await GetEkdCode(row);
+      /*       const EKD_CODE = await GetEkdCode(row);
+      
+            if (EKD_CODE.recordset) { */
+      const row_split = row.split(';')
 
-      if (EKD_CODE.recordset) {
-        const distinta = await GetDistintaBase(EKD_CODE.recordset.ITMREF_0, 1);
-        const materie = await GetMateriePrime(EKD_CODE.recordset.ITMREF_0);
-        const sll_pfl = await GetSemilavorati(EKD_CODE.recordset.ITMREF_0, 1);
+      const distinta = await GetDistintaBase(row_split[0], row_split[1]);
+      const materie = await GetMateriePrime(row_split[0]);
 
+      const sll_pfl = await GetSemilavorati(row_split[0], row_split[1]);
 
-
-        if (sll_pfl.length == 0 && materie.length > 0) {
-          const dis_mat = distinta.map(dis => {
-            const mat_sll = materie.filter((materiale) => {
-              return materiale.Padre == dis.Elemento;
-            });
-
-            if (mat_sll.length > 0) {
-              let tempObj = {
-                Complessivo: dis.Complessivo,
-                Padre: dis.Padre,
-                Elemento: dis.Elemento,
-                Materia: mat_sll[0].Elemento,
-                Materia_code: mat_sll[0].SEAKEY_0,
-                Quantita_materia: (Number(mat_sll[0].Quantita) * Number(dis.Quantita)).toLocaleString(),
-                Unita_materia: mat_sll[0].Unita,
-                Descrizione1: dis.Descrizione1,
-                Descrizione2: dis.Descrizione2,
-                Descrizione3: dis.Descrizione3,
-                CFGLIN_0: mat_sll[0].CFGLIN_0,
-                Quantita: dis.Quantita,
-                Unita: dis.Unita,
-                fase: dis.fase,
-              };
-              return defaults(tempObj, mat_sll[0]);
-
-            } else {
-
-              let tempObj = {
-                Complessivo: dis.Complessivo,
-                Padre: dis.Padre,
-                Elemento: dis.Elemento,
-                Materia: dis.Elemento,
-                Materia_code: dis.SEAKEY_0,
-                Quantita_materia: Number(dis.Quantita).toLocaleString(),
-                Unita_materia: dis.Unita,
-                Descrizione1: dis.Descrizione1,
-                Descrizione2: dis.Descrizione2,
-                Descrizione3: dis.Descrizione3,
-                CFGLIN_0: dis.CFGLIN_0,
-                Quantita: 1,
-                Unita: 'PZ',
-                fase: dis.fase,
-              };
-              return defaults(tempObj, dis);
-            }
-          })
-          return dis_mat;
+/*       if (row_split[0] == 'M00008893') {
+        if (materie.Elemento == 'M00007990') {
+          console.log(materie);
         } else {
-          const sll_pfl_mat = sll_pfl.map((sll) => {
-            const mat_sll = materie.filter((materiale) => {
-              return materiale.Padre == sll.Elemento;
-            });
 
-            if (mat_sll.length > 0) {
-              let tempObj = {
-                Complessivo: sll.Complessivo,
-                Padre: sll.Padre,
-                Elemento: sll.Elemento,
-                Materia: mat_sll[0].Elemento,
-                Materia_code: mat_sll[0].SEAKEY_0,
-                Quantita_materia: (Number(mat_sll[0].Quantita) * Number(sll.Quantita)).toLocaleString(),
-                Unita_materia: mat_sll[0].Unita,
-                Descrizione1: sll.Descrizione1,
-                Descrizione2: sll.Descrizione2,
-                Descrizione3: sll.Descrizione3,
-                CFGLIN_0: mat_sll[0].CFGLIN_0,
-                Quantita: sll.Quantita,
-                Unita: sll.Unita,
-                fase: sll.fase,
-              };
-              return defaults(tempObj, mat_sll[0]);
-            } else {
-              return sll;
-            }
-          });
-          return sll_pfl_mat;
         }
+      } */
+
+
+
+      if (sll_pfl.length == 0 && materie.length > 0) {
+        const dis_mat = distinta.map(dis => {
+          const mat_sll = materie.filter((materiale) => {
+            return materiale.Padre == dis.Elemento;
+          });
+
+          if (mat_sll.length > 0) {
+            let tempObj = {
+              Complessivo: dis.Complessivo,
+              Padre: dis.Padre,
+              Elemento: dis.Elemento,
+              Materia: mat_sll[0].Elemento,
+              Materia_code: mat_sll[0].SEAKEY_0,
+              Quantita_materia: (Number(mat_sll[0].Quantita) * Number(dis.Quantita)).toLocaleString(),
+              Unita_materia: mat_sll[0].Unita,
+              Descrizione1: mat_sll[0].Descrizione1,
+              Descrizione2: mat_sll[0].Descrizione2,
+              Descrizione3: mat_sll[0].Descrizione3,
+              CFGLIN_0: mat_sll[0].CFGLIN_0,
+              Quantita: dis.Quantita,
+              Unita: dis.Unita,
+              fase: dis.fase,
+            };
+            return defaults(tempObj, mat_sll[0]);
+
+          } else {
+
+            let tempObj = {
+              Complessivo: dis.Complessivo,
+              Padre: dis.Padre,
+              Elemento: dis.Elemento,
+              Materia: dis.Elemento,
+              Materia_code: dis.SEAKEY_0,
+              Quantita_materia: Number(dis.Quantita).toLocaleString(),
+              Unita_materia: dis.Unita,
+              Descrizione1: dis.Descrizione1,
+              Descrizione2: dis.Descrizione2,
+              Descrizione3: dis.Descrizione3,
+              CFGLIN_0: dis.CFGLIN_0,
+              Quantita: 1,
+              Unita: 'PZ',
+              fase: dis.fase,
+            };
+            return defaults(tempObj, dis);
+          }
+        })
+        return dis_mat;
       } else {
-        return EKD_CODE;
+        const sll_pfl_mat = sll_pfl.map((sll) => {
+          const mat_sll = materie.filter((materiale) => {
+            return materiale.Padre == sll.Elemento;
+          });
+
+          if (mat_sll.length > 0) {
+            let tempObj = {
+              Complessivo: sll.Complessivo,
+              Padre: sll.Padre,
+              Elemento: sll.Elemento,
+              Materia: mat_sll[0].Elemento,
+              Materia_code: mat_sll[0].SEAKEY_0,
+              Quantita_materia: (Number(mat_sll[0].Quantita) * Number(sll.Quantita)).toLocaleString(),
+              Unita_materia: mat_sll[0].Unita,
+              Descrizione1: mat_sll[0].Descrizione1,
+              Descrizione2: mat_sll[0].Descrizione2,
+              Descrizione3: mat_sll[0].Descrizione3,
+              CFGLIN_0: mat_sll[0].CFGLIN_0,
+              Quantita: sll.Quantita,
+              Unita: sll.Unita,
+              fase: sll.fase,
+            };
+            return defaults(tempObj, mat_sll[0]);
+          } else {
+            return sll;
+          }
+        });
+        return sll_pfl_mat;
       }
+      /*  } else {
+         return EKD_CODE;
+       } */
     });
 
     const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
@@ -182,9 +193,19 @@ app.post(
           Padre_cliente: codice_padre,
           Elemento: row.Elemento,
           Elemento_cliente: codice_elemento,
+          Materia_code:row.Materia_code,
+          Materia:row.Materia,
+          Categoria:row.Categoria,
+          Famiglia_code:row.CFGLIN_0,
+          Famiglia_desc:row.desc_fam,
+          Descrizione1:row.Descrizione1,
+          Descrizione2:row.Descrizione2,
+          Descrizione3:row.Descrizione3,          
+          Quantita_materia:row.Quantita_materia,
+          Unita_materia:row.Unita_materia,
         };
 
-        return defaults(tempRow, row);
+        return defaults(tempRow, {});
       });
 
       const codeArrayDistintePost = await Promise.all(codeArrayDistinte);
@@ -210,12 +231,12 @@ app.post(
 async function GetMateriePrime(ITMREF) {
   const query = `	  with wth as 
   (
-    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='2'
+    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='2' and (BOMENDDAT_0 = '1753-01-01 00:00:00.000')
     union ALL
     select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
     from wth w
     join PRODEKD.BOMD D on w.CPNITMREF_0 = D.ITMREF_0
-    where D.BOMALT_0='2'
+    where D.BOMALT_0='2'  and (D.BOMENDDAT_0 = '1753-01-01 00:00:00.000' or D.BOMENDDAT_0 >GETDATE())
 
   )
 
@@ -227,35 +248,33 @@ async function GetMateriePrime(ITMREF) {
       from PRODEKD.STOCK
       group by ITMREF_0
     ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-    where BOMALT_0='2' and TCLCOD_0 in ('MPL01') 
+    where BOMALT_0='2' and TCLCOD_0 not in ('PFL01','SLL01') 
     `;
 
   const sage = await connection.connect();
   const result = await sage.query(query);
 
   const lineeBP = result.recordset.map(async (row, index) => {
-    const linee = await GetLineeProdotto(row.Elemento);
-    const ciclo = await GetPrimaFase(row.Elemento);
-
+    /* const linee = await GetLineeProdotto(row.Elemento);
+    const ciclo = await GetPrimaFase(row.Elemento); */
+    const descrizione_famiglia = await GetDescrizioneFamiglia(row.CFGLIN_0)
     let tempObj = { ...row };
 
-    let unionTemp = { ...tempObj, fase: ciclo, ...linee };
+    let unionTemp = { ...tempObj, desc_fam:descrizione_famiglia };
 
     return unionTemp;
   });
   return Promise.all(lineeBP);
 }
-
-
 async function GetSemilavorati(ITMREF, in_production) {
   const query = `	  with wth as 
   (
-    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='2'
+    select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and BOMALT_0='2' and (BOMENDDAT_0 = '1753-01-01 00:00:00.000' or BOMENDDAT_0 >GETDATE())
     union ALL
     select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
     from wth w
     join PRODEKD.BOMD D on w.CPNITMREF_0 = D.ITMREF_0
-  where D.BOMALT_0='2'
+  where D.BOMALT_0='2'  and (D.BOMENDDAT_0 = '1753-01-01 00:00:00.000' or D.BOMENDDAT_0 >GETDATE())
 
   )
 
@@ -294,12 +313,12 @@ async function GetSemilavorati(ITMREF, in_production) {
     after.push(tempRow);
   });
   const lineeBP = after.map(async (row, index) => {
-    const linee = await GetLineeProdotto(row.Elemento);
-    const ciclo = await GetPrimaFase(row.Elemento);
+/*     const linee = await GetLineeProdotto(row.Elemento);
+    const ciclo = await GetPrimaFase(row.Elemento); */
 
     let tempObj = { ...row };
 
-    let unionTemp = { ...tempObj, fase: ciclo, ...linee };
+    let unionTemp = { ...tempObj};
 
     return unionTemp;
   });
@@ -358,7 +377,6 @@ function GetEkdCode(CodiceCliente) {
 */
   });
 }
-
 //GetDistintaBase("M00003550");
 async function GetPrimaFase(ITMREF) {
   const query = `	  SELECT  TEXTE_0 
@@ -380,7 +398,7 @@ async function GetPrimaFase(ITMREF) {
 async function GetDistintaBase(ITMREF, in_production) {
   const query = `with wth as 
     (
-      select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' 
+      select ITMREF_0,CPNITMREF_0,BOMQTY_0,BOMUOM_0, BOMALT_0 from PRODEKD.BOMD where ITMREF_0='${ITMREF}' and (BOMENDDAT_0 = '1753-01-01 00:00:00.000' or BOMENDDAT_0 >GETDATE())
       union ALL
       select D.ITMREF_0,D.CPNITMREF_0,D.BOMQTY_0,D.BOMUOM_0,D.BOMALT_0
       from wth w
@@ -422,11 +440,9 @@ async function GetDistintaBase(ITMREF, in_production) {
     after.push(tempRow);
   });
   const lineeBP = after.map(async (row, index) => {
-    const linee = await GetLineeProdotto(row.Elemento);
-    const ciclo = await GetPrimaFase(row.Complessivo);
 
     let tempObj = { ...row };
-    let unionTemp = { ...tempObj, fase: ciclo, ...linee };
+    let unionTemp = { ...tempObj };
 
     return unionTemp;
   });
@@ -452,8 +468,8 @@ async function GetLineeProdotto(elemento) {
  */
     /**------------------------------------------------------------------------------- */
     var temp = {};
-    temp["STATISTICO 1"] = await GetStatistico1(elemento);
-    temp["STATISTICO 2"] = await GetStatistico2(elemento);
+   /*  temp["STATISTICO 1"] = await GetStatistico1(elemento);
+    temp["STATISTICO 2"] = await GetStatistico2(elemento); */
     const lp = await sage.query(`
        select CFGNUM1_0,CFGNUM2_0,CFGNUM3_0,CFGNUM4_0,CFGNUM5_0,CFGNUM6_0 from  PRODEKD.TABLINCFG WHERE CFGLIN_0=(
          select CFGLIN_0  from PRODEKD.ITMMASTER where ITMREF_0='${elemento}'
@@ -471,11 +487,12 @@ async function GetLineeProdotto(elemento) {
       `select LANMES_0 from PRODEKD.APLSTD where LANCHP_0=760 and LAN_0='ITA'`
     );
     var model = {};
+    /*    
     lab.recordset.forEach((la) => {
       model[la.LANMES_0] = 0;
     });
     if (lp.recordset.length > 0) {
-      const label_key = Object.keys(lp.recordset[0]);
+   const label_key = Object.keys(lp.recordset[0]);
       const lb_ = await sage.query(
         `select * from PRODEKD.APLSTD where LANCHP_0=760 and LAN_0='ITA'`
       );
@@ -489,10 +506,11 @@ async function GetLineeProdotto(elemento) {
       });
 
       const te = defaults(temp, model);
-      return resolve(te);
+      return resolve(te); 
     } else {
-      resolve(defaults(temp, model));
     }
+    */
+    resolve(defaults(temp, model));
   });
 }
 async function GetStatistico1(elemento) {
@@ -517,6 +535,21 @@ async function GetStatistico2(elemento) {
     select TEXTE_0 from PRODEKD.ATEXTRA
     where LANGUE_0='ITA' and IDENT1_0='21' and ZONE_0='LNGDES' and IDENT2_0 = (
     select TSICOD_1 from PRODEKD.ITMMASTER where ITMREF_0='${elemento}') and IDENT2_0<>''
+    `);
+  if (statistico.recordset.length > 0) {
+    return statistico.recordset[0].TEXTE_0;
+  } else {
+    return "";
+  }
+  return statistico.recordset;
+}
+async function GetDescrizioneFamiglia(CFGLIN) {
+  const sage = await connection.connect();
+
+  const statistico = await sage.query(` select * from PRODEKD.ATEXTRA 
+        where CODFIC_0 = 'TABLINCFG' 
+        and ZONE_0='CFGLINAXX'
+        and IDENT1_0='${CFGLIN}'
     `);
   if (statistico.recordset.length > 0) {
     return statistico.recordset[0].TEXTE_0;
