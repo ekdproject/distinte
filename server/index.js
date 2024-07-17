@@ -65,18 +65,27 @@ app.post(
 
       const sll_pfl = await GetSemilavorati(row_split[0], row_split[1]);
 
-/*       if (row_split[0] == 'M00008893') {
-        if (materie.Elemento == 'M00007990') {
-          console.log(materie);
-        } else {
 
+   /*    distinta.filter(el=>{
+        if(el.Elemento=="M00007444"){
+          console.log(el);
         }
-      } */
+      }) */
 
+   /*    console.log(distinta,
+        materie,
+        sll_pfl); */
+      /*     distinta.filter(el=>{
+            if(el.Elemento=="M00007444"){
+              console.log(el);
+            }
+          });
+     */
 
 
       if (sll_pfl.length == 0 && materie.length > 0) {
         const dis_mat = distinta.map(dis => {
+
           const mat_sll = materie.filter((materiale) => {
             return materiale.Padre == dis.Elemento;
           });
@@ -159,6 +168,10 @@ app.post(
 
     const arrayDistinte = [...(await Promise.all(arrayDBBeforePromise))];
 
+/*     arrayDistinte.filter(el=>{
+    
+    })
+ */
     const undefined_number = arrayDistinte.filter((row) => {
       return row.recordset;
     });
@@ -193,16 +206,16 @@ app.post(
           Padre_cliente: codice_padre,
           Elemento: row.Elemento,
           Elemento_cliente: codice_elemento,
-          Materia_code:row.Materia_code,
-          Materia:row.Materia,
-          Categoria:row.Categoria,
-          Famiglia_code:row.CFGLIN_0,
-          Famiglia_desc:row.desc_fam,
-          Descrizione1:row.Descrizione1,
-          Descrizione2:row.Descrizione2,
-          Descrizione3:row.Descrizione3,          
-          Quantita_materia:row.Quantita_materia,
-          Unita_materia:row.Unita_materia,
+          Materia_code: row.Materia_code,
+          Materia: row.Materia,
+          Categoria: row.Categoria,
+          Famiglia_code: row.CFGLIN_0,
+          Famiglia_desc: row.desc_fam,
+          Descrizione1: row.Descrizione1,
+          Descrizione2: row.Descrizione2,
+          Descrizione3: row.Descrizione3,
+          Quantita_materia: row.Quantita_materia,
+          Unita_materia: row.Unita_materia,
         };
 
         return defaults(tempRow, {});
@@ -215,6 +228,8 @@ app.post(
           //   console.log(e);
         }
       })
+
+
       const csv = csvParser.parse(codeArrayDistintePost);
       const csv1 = jsonToCsv(codeArrayDistintePost)
       console.log();
@@ -260,7 +275,7 @@ async function GetMateriePrime(ITMREF) {
     const descrizione_famiglia = await GetDescrizioneFamiglia(row.CFGLIN_0)
     let tempObj = { ...row };
 
-    let unionTemp = { ...tempObj, desc_fam:descrizione_famiglia };
+    let unionTemp = { ...tempObj, desc_fam: descrizione_famiglia };
 
     return unionTemp;
   });
@@ -286,7 +301,7 @@ async function GetSemilavorati(ITMREF, in_production) {
       from PRODEKD.STOCK
       group by ITMREF_0
     ) stock on stock.ITMREF_0=wth.CPNITMREF_0 
-    where BOMALT_0='2' and TCLCOD_0 in ('PFL01','SLL01')
+    where BOMALT_0='2' and TCLCOD_0 in ('PFL01','SLL01','CPL01')
     `;
 
   const sage = await connection.connect();
@@ -313,12 +328,12 @@ async function GetSemilavorati(ITMREF, in_production) {
     after.push(tempRow);
   });
   const lineeBP = after.map(async (row, index) => {
-/*     const linee = await GetLineeProdotto(row.Elemento);
-    const ciclo = await GetPrimaFase(row.Elemento); */
+    /*     const linee = await GetLineeProdotto(row.Elemento);
+        const ciclo = await GetPrimaFase(row.Elemento); */
 
     let tempObj = { ...row };
 
-    let unionTemp = { ...tempObj};
+    let unionTemp = { ...tempObj };
 
     return unionTemp;
   });
@@ -468,8 +483,8 @@ async function GetLineeProdotto(elemento) {
  */
     /**------------------------------------------------------------------------------- */
     var temp = {};
-   /*  temp["STATISTICO 1"] = await GetStatistico1(elemento);
-    temp["STATISTICO 2"] = await GetStatistico2(elemento); */
+    /*  temp["STATISTICO 1"] = await GetStatistico1(elemento);
+     temp["STATISTICO 2"] = await GetStatistico2(elemento); */
     const lp = await sage.query(`
        select CFGNUM1_0,CFGNUM2_0,CFGNUM3_0,CFGNUM4_0,CFGNUM5_0,CFGNUM6_0 from  PRODEKD.TABLINCFG WHERE CFGLIN_0=(
          select CFGLIN_0  from PRODEKD.ITMMASTER where ITMREF_0='${elemento}'
